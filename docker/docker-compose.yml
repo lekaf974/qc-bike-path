@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  qc-bike-path:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: qc-bike-path-etl
+    environment:
+      - QC_BIKE_PATH_MONGODB_URL=mongodb://mongodb:27017
+      - QC_BIKE_PATH_LOG_LEVEL=INFO
+      - QC_BIKE_PATH_ENVIRONMENT=production
+    volumes:
+      - ./logs:/app/logs
+      - ./config:/app/config
+    depends_on:
+      - mongodb
+    networks:
+      - bike-path-network
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:7.0
+    container_name: qc-bike-path-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d
+    ports:
+      - "27017:27017"
+    networks:
+      - bike-path-network
+    restart: unless-stopped
+
+  # Optional: MongoDB Admin Interface
+  mongo-express:
+    image: mongo-express:latest
+    container_name: qc-bike-path-mongo-express
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongodb
+    networks:
+      - bike-path-network
+    restart: unless-stopped
+    profiles: ["admin"]
+
+networks:
+  bike-path-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
