@@ -1,10 +1,10 @@
 """Logging configuration and setup."""
 
+import asyncio
 import logging
 import logging.config
 import sys
 from typing import Any
-from typing import Dict
 
 import structlog
 
@@ -28,21 +28,25 @@ def setup_logging() -> None:
     ]
 
     if settings.log_format.lower() == "json":
-        processors.extend([
-            structlog.processors.dict_tracebacks,
-            structlog.processors.JSONRenderer(),
-        ])
+        processors.extend(
+            [
+                structlog.processors.dict_tracebacks,
+                structlog.processors.JSONRenderer(),
+            ]
+        )
     else:
-        processors.extend([
-            structlog.processors.CallsiteParameterAdder(
-                {
-                    structlog.processors.CallsiteParameter.FILENAME,
-                    structlog.processors.CallsiteParameter.FUNC_NAME,
-                    structlog.processors.CallsiteParameter.LINENO,
-                }
-            ),
-            structlog.dev.ConsoleRenderer(colors=True),
-        ])
+        processors.extend(
+            [
+                structlog.processors.CallsiteParameterAdder(
+                    {
+                        structlog.processors.CallsiteParameter.FILENAME,
+                        structlog.processors.CallsiteParameter.FUNC_NAME,
+                        structlog.processors.CallsiteParameter.LINENO,
+                    }
+                ),
+                structlog.dev.ConsoleRenderer(colors=True),
+            ]
+        )
 
     structlog.configure(
         processors=processors,
@@ -56,10 +60,10 @@ def setup_logging() -> None:
 
 def get_logger(name: str) -> structlog.BoundLogger:
     """Get a structured logger instance.
-    
+
     Args:
         name: Logger name (usually __name__)
-        
+
     Returns:
         Configured structlog logger
     """
@@ -77,10 +81,10 @@ class LoggerMixin:
 
 def log_execution_time(func_name: str):
     """Decorator to log execution time of functions.
-    
+
     Args:
         func_name: Name of the function for logging
-        
+
     Returns:
         Decorator function
     """
@@ -92,19 +96,21 @@ def log_execution_time(func_name: str):
         async def async_wrapper(*args, **kwargs):
             logger = structlog.get_logger(func_name)
             start_time = time.time()
-            
+
             try:
                 logger.debug("Function execution started")
                 result = await func(*args, **kwargs)
                 execution_time = time.time() - start_time
-                logger.info("Function execution completed", execution_time=execution_time)
+                logger.info(
+                    "Function execution completed", execution_time=execution_time
+                )
                 return result
             except Exception as e:
                 execution_time = time.time() - start_time
                 logger.error(
                     "Function execution failed",
                     execution_time=execution_time,
-                    error=str(e)
+                    error=str(e),
                 )
                 raise
 
@@ -112,35 +118,37 @@ def log_execution_time(func_name: str):
         def sync_wrapper(*args, **kwargs):
             logger = structlog.get_logger(func_name)
             start_time = time.time()
-            
+
             try:
                 logger.debug("Function execution started")
                 result = func(*args, **kwargs)
                 execution_time = time.time() - start_time
-                logger.info("Function execution completed", execution_time=execution_time)
+                logger.info(
+                    "Function execution completed", execution_time=execution_time
+                )
                 return result
             except Exception as e:
                 execution_time = time.time() - start_time
                 logger.error(
                     "Function execution failed",
                     execution_time=execution_time,
-                    error=str(e)
+                    error=str(e),
                 )
                 raise
-        
+
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
-        else:
-            return sync_wrapper
-    
+        return sync_wrapper
+
     return decorator
 
 
 # Additional utility functions for common logging patterns
 
+
 def log_data_operation(operation: str, count: int, **kwargs: Any) -> None:
     """Log data operation with standardized format.
-    
+
     Args:
         operation: Type of operation (extract, transform, load)
         count: Number of records processed
@@ -148,21 +156,18 @@ def log_data_operation(operation: str, count: int, **kwargs: Any) -> None:
     """
     logger = structlog.get_logger("data_operation")
     logger.info(
-        "Data operation completed",
-        operation=operation,
-        record_count=count,
-        **kwargs
+        "Data operation completed", operation=operation, record_count=count, **kwargs
     )
 
 
 def log_error_with_context(
     logger: structlog.BoundLogger,
     error: Exception,
-    context: Dict[str, Any],
-    operation: str = "unknown"
+    context: dict[str, Any],
+    operation: str = "unknown",
 ) -> None:
     """Log error with additional context information.
-    
+
     Args:
         logger: Structlog logger instance
         error: Exception that occurred
@@ -174,9 +179,5 @@ def log_error_with_context(
         operation=operation,
         error_type=type(error).__name__,
         error_message=str(error),
-        **context
+        **context,
     )
-
-
-# Import asyncio for the decorator
-import asyncio

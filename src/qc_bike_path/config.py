@@ -1,7 +1,5 @@
 """Configuration management for QC Bike Path ETL service."""
 
-from typing import Optional
-
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
@@ -19,7 +17,9 @@ class Settings(BaseSettings):
         description="Resource ID for bike path dataset",
     )
     api_timeout: int = Field(default=30, description="API request timeout in seconds")
-    api_retry_attempts: int = Field(default=3, description="Number of API retry attempts")
+    api_retry_attempts: int = Field(
+        default=3, description="Number of API retry attempts"
+    )
 
     # MongoDB Configuration
     mongodb_url: str = Field(
