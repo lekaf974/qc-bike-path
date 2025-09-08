@@ -3,13 +3,11 @@
 import json
 from datetime import datetime
 from typing import Any
-from typing import Dict
-from typing import List
 
 
-def get_sample_api_response() -> Dict[str, Any]:
+def get_sample_api_response() -> dict[str, Any]:
     """Get sample API response data for testing.
-    
+
     Returns:
         Sample API response with bike path records
     """
@@ -57,9 +55,9 @@ def get_sample_api_response() -> Dict[str, Any]:
     }
 
 
-def get_sample_geojson_response() -> Dict[str, Any]:
+def get_sample_geojson_response() -> dict[str, Any]:
     """Get sample GeoJSON response for testing.
-    
+
     Returns:
         Sample GeoJSON FeatureCollection
     """
@@ -114,9 +112,9 @@ def get_sample_geojson_response() -> Dict[str, Any]:
     }
 
 
-def get_invalid_records() -> List[Dict[str, Any]]:
+def get_invalid_records() -> list[dict[str, Any]]:
     """Get invalid records for testing error handling.
-    
+
     Returns:
         List of invalid record dictionaries
     """
@@ -150,9 +148,9 @@ def get_invalid_records() -> List[Dict[str, Any]]:
     ]
 
 
-def get_transformed_record_sample() -> Dict[str, Any]:
+def get_transformed_record_sample() -> dict[str, Any]:
     """Get sample transformed record for testing.
-    
+
     Returns:
         Sample transformed BikePathRecord as dict
     """
@@ -175,9 +173,9 @@ def get_transformed_record_sample() -> Dict[str, Any]:
     }
 
 
-def get_mongodb_test_config() -> Dict[str, Any]:
+def get_mongodb_test_config() -> dict[str, Any]:
     """Get test MongoDB configuration.
-    
+
     Returns:
         Test MongoDB configuration
     """
@@ -189,23 +187,24 @@ def get_mongodb_test_config() -> Dict[str, Any]:
     }
 
 
-def create_mock_aiohttp_response(data: Dict[str, Any], status: int = 200) -> Any:
+def create_mock_aiohttp_response(data: dict[str, Any], status: int = 200) -> Any:
     """Create mock aiohttp response for testing.
-    
+
     Args:
         data: Response data
         status: HTTP status code
-        
+
     Returns:
         Mock response object
     """
-    from unittest.mock import AsyncMock, MagicMock
-    
+    from unittest.mock import AsyncMock
+    from unittest.mock import MagicMock
+
     mock_response = MagicMock()
     mock_response.status = status
     mock_response.json = AsyncMock(return_value=data)
     mock_response.raise_for_status = MagicMock()
-    
+
     return mock_response
 
 
@@ -243,7 +242,7 @@ ERROR_SCENARIOS = {
         "message": "Resource not found",
     },
     "api_500": {
-        "error_type": "ClientResponseError", 
+        "error_type": "ClientResponseError",
         "status": 500,
         "message": "Internal server error",
     },
